@@ -13,6 +13,11 @@ struct Stm32mp157f{
       auto stm32pin = arduinoConnectorToBoardPinMap.at(arduinoPin); 
       return GpioMap.at(stm32pin);
   }
+
+   static std::string GetStm32PinArduinoConnectorPin(const std::string& arduinoPin){
+      auto stm32pin = arduinoConnectorToBoardPinMap.at(arduinoPin); 
+      return stm32pin;
+  }
 };
 
 const std::map<std::string, std::pair<std::string, int>> Stm32mp157f::GpioMap = {
@@ -181,7 +186,8 @@ const std::map<std::string, std::string> Stm32mp157f::arduinoConnectorToBoardPin
                                                                                         {"ARD_D12", "PE13"},
                                                                                         {"ARD_D13", "PE12"},
                                                                                         {"ARD_D14", "PA12"},
-                                                                                        {"ARD_D15", "PA11"}};
+                                                                                        {"ARD_D15", "PA11"},
+                                                                                        {"PA14",    "PA14"}};
 
 /* root@stm32mp1:/dev# gpiodetect
 gpiochip0 [GPIOA] (16 lines)

@@ -3,91 +3,109 @@
 
 namespace Printer{
 
-    void PinController::InitializeBoardPinConfigMapFromArduinoConnectorConfiguration(){
+  void PinController::InitializeBoardPinConfigMapFromArduinoConnectorConfiguration(){
 
-        PinConfig config{};
+    for (const auto &entry : m_ArdiunoConnectorPinConfiguration){
+        
+      std::string arduinoPin = entry.second.first;
+      PinDirection   direction  = entry.second.second;
+      auto stm32name = Stm32mp157f::GetStm32PinArduinoConnectorPin(arduinoPin);
+      auto chipAndLine = Stm32mp157f::GetChipAndLineFromArduinoConnectorPin(arduinoPin);
+      PinConfig config{};
+      config.name = stm32name;
+      config.chip = chipAndLine.first;
+    //   config.line = chipAndLine.second;
+      config.direction = direction;    
+      m_PinConfigMap[entry.first] = config;
     }
+  }
+
+  void PinController::OpenFileDescriptors(){
+
+    for (const auto &entry : m_PinConfigMap){
+
+      const std::string& chipName = entry.second.chip;
+
+      // Check if the GPIO chip is already opened
+      if (m_GpioChipFileDescriptors.find(chipName) == m_GpioChipFileDescriptors.end()){
+
+        int fd = open(("/dev/" + chipName).c_str(), O_RDWR);
+
+          if (fd < 0) {
+            perror(("Error opening GPIO character device " + chipName).c_str());
+                  // Handle error as needed
+          }
+          else {
+            std::cout << "Successfully opened GPIO character device " << chipName << ". File descriptor: " << fd << std::endl;
+            m_GpioChipFileDescriptors[chipName] = fd;
+          }
+        }
+      }
+  }
+
+  void PinController::ConfigurePins(){
+
+    for (const auto &entry : m_PinConfigMap){
+
+      const std::string& label = entry.first;
+      const std::string& chipName = entry.second.chip;
+
+      struct gpiohandle_request req;
+      struct gpiohandle_data data;
+
+      req.lineoffsets[0] = entry.second.offset;
+      PinDirection dir = entry.second.direction;
+
+      if (dir == Output) {
+        req.flags = GPIOHANDLE_REQUEST_OUTPUT;
+      } else{
+        req.flags = GPIOHANDLE_REQUEST_INPUT;
+      }
+
+      memcpy(req.default_values, &data, sizeof(req.default_values));
+      strcpy(req.consumer_label, label.c_str());
+      req.lines  = 1;
+
+      auto fd = m_GpioChipFileDescriptors.at(chipName);
+
+      auto ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
+
+	  if (ret == -1) {
+		ret = -errno;
+		fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n", ret);
+	  }
+
+      m_PinHandleRequests[label] = req;
+      m_PinData[label] = data;
+    }
+  }
+
+  void PinController::TogglePin(const std::string& label){
+
+    auto req = m_PinHandleRequests.at(label);
+    auto data = m_PinData.at(label);
+
+    data.values[0] = !data.values[0];
+
+    auto ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+		if (ret == -1) {
+			ret = -errno;
+			fprintf(stderr, "Failed to issue %s (%d)\n", "GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
+		}
+  }
 
   PinController::PinController() {
 
     InitializeBoardPinConfigMapFromArduinoConnectorConfiguration();
-
-    for (const auto &entry : m_PinConfigMap){
-
-          const std::string &chipName = entry.second.chip;
-
-          // Check if the GPIO chip is already opened
-          if (m_GpioChipFileDescriptors.find(chipName) == m_GpioChipFileDescriptors.end()){
-
-              int fd = open(("/dev/" + chipName).c_str(), O_RDWR);
-
-              if (fd < 0) {
-                  perror(("Error opening GPIO character device " + chipName).c_str());
-                  // Handle error as needed
-              }
-              else {
-
-                  std::cout << "Successfully opened GPIO character device " << chipName << ". File descriptor: " << fd << std::endl;
-                  m_GpioChipFileDescriptors[chipName] = fd;
-              }
-          }
-      }
-    }
+    OpenFileDescriptors();
+    ConfigurePins();  
+  }
     
-    PinController::~PinController() {
+  PinController::~PinController() {
 
-        for (const auto &entry : m_GpioChipFileDescriptors){
-            close(entry.second);
-        }
+    for (const auto &entry : m_GpioChipFileDescriptors){
+      close(entry.second);
     }
+  }
 
-    void PinController::ConfigureGPIOLine(const PinConfig &pinConfig, int fd, unsigned int flags) {
-
-        struct gpiohandle_request req =
-        {
-            .flags = flags,
-            .lines = 1,
-            .default_values = NULL,
-            .consumer_label = ("gpio_" + pinConfig.chip + "_" + std::to_string(pinConfig.offset)).c_str(),
-            .fd = -1,
-            .gpiooffset = pinConfig.offset,
-
-            if (ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req) < 0){
-                perror(("Error configuring GPIO line for " + pinConfig.chip + " offset " + std::to_string(pinConfig.offset)).c_str());
-    }
-    else
-    {
-        std::cout << "Successfully configured GPIO line for " << pinConfig.chip << " offset " << pinConfig.offset << ". File descriptor: " << req.fd << std::endl;
-        // Perform additional GPIO operations using req.fd
-        close(req.fd); // Close the file descriptor when done
-    }
-}
-}
-
-    int PinController::GetGPIOLineValue(int fd, unsigned int offset){
-
-        struct gpiohandle_data data = {
-            .values = {0}, // Initialize all elements to 0
-            .mask = 1 << offset};
-
-        if (ioctl(fd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data) < 0)
-        {
-            perror(("Error getting GPIO line value for file descriptor " + std::to_string(fd) + " offset " + std::to_string(offset)).c_str());
-            return -1; // Error
-        }
-
-        return data.values[0];
-    }
-
-    void PinController::SetGPIOLineValue(int fd, unsigned int offset, int value){
-
-        struct gpiohandle_data data = {
-            .values = &value,
-            .mask = 1 << offset,
-        };
-
-        if (ioctl(fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data) < 0){
-            perror(("Error setting GPIO line value for file descriptor " + std::to_string(fd) + " offset " + std::to_string(offset)).c_str());
-        }
-    }
 }

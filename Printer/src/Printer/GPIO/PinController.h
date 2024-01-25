@@ -21,6 +21,7 @@ namespace Printer{
     };
 
     struct PinConfig{
+        std::string name;
         std::string chip;
         unsigned int offset;
         PinDirection direction;
@@ -29,38 +30,31 @@ namespace Printer{
   public:
     explicit PinController();
     virtual ~PinController();
+    void TogglePin(const std::string& label);
 
   private:
-    void ConfigureGPIOLine(const PinConfig &pinConfig, int fd, unsigned int flags);
-    void SetGPIOLineValue(int fd, unsigned int offset, int value);
-    int  GetGPIOLineValue(int fd, unsigned int offset);
+    void OpenFileDescriptors();
     void InitializeBoardPinConfigMapFromArduinoConnectorConfiguration(); 
+    void ConfigurePins();
 
   private:
-   /*  std::map<std::string, PinConfig> m_PinConfigMap = {
-                                                        {"LED1", {"gpiochip0", 0, Output}},
-                                                        {"LED2", {"gpiochip0", 1, Output}},
-                                                        {"BUTTON1", {"gpiochip1", 2, Input}},
-                                                        {"BUTTON2", {"gpiochip1", 3, Input}}
-                                                       }; */
-    std::map<std::string, PinConfig> m_PinConfigMap;
-
-    std::map<std::string, int> m_GpioChipFileDescriptors;
+    std::map<std::string, PinConfig>          m_PinConfigMap;
+    std::map<std::string, int>                m_GpioChipFileDescriptors;
+    std::map<std::string, gpiohandle_request> m_PinHandleRequests;
+    std::map<std::string, gpiohandle_data>    m_PinData;
 
   private:
-    std::map<std::string, std::pair<std::string, PinDirection>> m_ArdiunoConnectorPinConfiguration = {
-                                                                                                      {"X-Pulse",     {"ARD_D2", Output}},
-                                                                                                      {"Y-Pulse",     {"ARD_D3", Output}},
-                                                                                                      {"Z-Pulse",     {"ARD_D4", Output}}, 
-                                                                                                      {"X-Direction", {"ARD_D5", Output}}, 
-                                                                                                      {"Y-Direction", {"ARD_D6", Output}}, 
-                                                                                                      {"Z-Direction", {"ARD_D7", Output}}, 
-                                                                                                      {"DriveEnable", {"ARD_D8", Output}}, 
-                                                                                                      {"X-Limit",     {"ARD_D9", Input}},  
-                                                                                                      {"Y-Limit",     {"ARD_D10", Input}}, 
-                                                                                                      {"Z-Limit",     {"ARD_D11", Input}}  
+    std::map<std::string, std::pair<std::string, PinDirection>> m_ArdiunoConnectorPinConfiguration = { {"Led1",     {"PA14", Output}}
+                                                                                                      // {"X-Pulse",     {"ARD_D2", Output}},
+                                                                                                      // {"Y-Pulse",     {"ARD_D3", Output}},
+                                                                                                      // {"Z-Pulse",     {"ARD_D4", Output}}, 
+                                                                                                      // {"X-Direction", {"ARD_D5", Output}}, 
+                                                                                                      // {"Y-Direction", {"ARD_D6", Output}}, 
+                                                                                                      // {"Z-Direction", {"ARD_D7", Output}}, 
+                                                                                                      // {"DriveEnable", {"ARD_D8", Output}}, 
+                                                                                                      // {"X-Limit",     {"ARD_D9", Input}},  
+                                                                                                      // {"Y-Limit",     {"ARD_D10", Input}}, 
+                                                                                                      // {"Z-Limit",     {"ARD_D11", Input}}  
                                                                                                       };
-
   };
-
 }
