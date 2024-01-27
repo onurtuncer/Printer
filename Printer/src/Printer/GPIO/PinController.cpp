@@ -7,14 +7,15 @@ namespace Printer{
 
     for (const auto &entry : m_ArdiunoConnectorPinConfiguration){
         
-      std::string arduinoPin = entry.second.first;
-      PinDirection   direction  = entry.second.second;
-      auto stm32name = Stm32mp157f::GetStm32PinArduinoConnectorPin(arduinoPin);
-      auto chipAndLine = Stm32mp157f::GetChipAndLineFromArduinoConnectorPin(arduinoPin);
+      std::string  arduinoPin = entry.second.first;
+      PinDirection direction  = entry.second.second;
+      Stm32mp157f board;
+      auto stm32name = board.GetStm32PinArduinoConnectorPin(arduinoPin);
+      auto chipAndLine = board.GetChipAndLineFromArduinoConnectorPin(arduinoPin);
       PinConfig config{};
       config.name = stm32name;
       config.chip = chipAndLine.first;
-    //   config.line = chipAndLine.second;
+      // config.line = chipAndLine.second;
       config.direction = direction;    
       m_PinConfigMap[entry.first] = config;
     }
@@ -70,10 +71,10 @@ namespace Printer{
 
       auto ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
 
-	  if (ret == -1) {
-		ret = -errno;
-		fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n", ret);
-	  }
+	    if (ret == -1) {
+		    ret = -errno;
+		    fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n", ret);
+	    }
 
       m_PinHandleRequests[label] = req;
       m_PinData[label] = data;
@@ -86,6 +87,63 @@ namespace Printer{
     auto data = m_PinData.at(label);
 
     data.values[0] = !data.values[0];
+
+    auto ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+		if (ret == -1) {
+			ret = -errno;
+			fprintf(stderr, "Failed to issue %s (%d)\n", "GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
+		}
+  }
+
+  void PinController::SendPulse(const std::string& label){
+
+    TogglePin(label);
+    TogglePin(label);
+  }
+
+   bool PinController::ReadPin(const std::string& label){
+
+     auto req = m_PinHandleRequests.at(label);
+     bool data;  // Assuming the pin value is boolean
+
+     auto ret = ioctl(req.fd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data);
+
+     if (ret != -1) {
+      return data;
+    } else {
+       ret = -errno;
+       throw std::runtime_error("Failed to read pin value");
+    }
+   }
+
+  void PinController::SetPin(const std::string& label){
+
+    auto req = m_PinHandleRequests.at(label);
+    auto data = true;
+
+    auto ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+		if (ret == -1) {
+			ret = -errno;
+			fprintf(stderr, "Failed to issue %s (%d)\n", "GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
+		}
+  }
+
+  void PinController::ResetPin(const std::string& label){
+
+    auto req = m_PinHandleRequests.at(label);
+    auto data = false;
+
+    auto ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
+		if (ret == -1) {
+			ret = -errno;
+			fprintf(stderr, "Failed to issue %s (%d)\n", "GPIOHANDLE_SET_LINE_VALUES_IOCTL", ret);
+		}
+  }
+
+  void PinController::WriteValueToPin(const std::string& label, const bool value){
+
+    auto req = m_PinHandleRequests.at(label);
+    auto data = value;
 
     auto ret = ioctl(req.fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data);
 		if (ret == -1) {

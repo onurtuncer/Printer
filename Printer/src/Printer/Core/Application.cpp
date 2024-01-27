@@ -12,7 +12,7 @@ namespace Printer {
     : QGuiApplication(argc, argv), m_ApplicationSpecification(spec) {
 
     PRINTER_CORE_ASSERT(!s_Instance, "Application already exists!");
-	s_Instance = this;
+	  s_Instance = this;
     Initialize();
   }
 
@@ -44,6 +44,8 @@ namespace Printer {
       PRINTER_CRITICAL("[UI::Application] QML engine root object is empty, terminating program!..");
       return false;
     }
+
+    // Initialize pin controller
 
     return true;
   }

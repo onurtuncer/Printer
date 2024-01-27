@@ -5,6 +5,7 @@
 #include <QQmlApplicationEngine>
 #include "ApplicationSpecification.h"
 #include "SignalHandler.h"
+#include "GPIO/PinController.h"
 
 namespace Printer {
 
@@ -19,12 +20,6 @@ namespace Printer {
 
     void Shutdown();
 
-//   public slots:
-//     void Slots();
-
-//   signals:
-//     void Signals();
-
   private:
     bool Initialize();
     ApplicationSpecification m_ApplicationSpecification;
@@ -37,6 +32,8 @@ namespace Printer {
   private:
     QQmlApplicationEngine* m_QmlAppEngine;
     QQmlContext* m_RootContext;
-   };
+  private:
+    std::shared_ptr<PinController> m_PinControllerPtr;
+  };
  
 } 

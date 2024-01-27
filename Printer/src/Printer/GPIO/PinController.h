@@ -31,6 +31,11 @@ namespace Printer{
     explicit PinController();
     virtual ~PinController();
     void TogglePin(const std::string& label);
+    void SendPulse(const std::string& label);
+    bool ReadPin(const std::string& label);
+    void SetPin(const std::string& label); // Pin high
+    void ResetPin(const std::string& label); // Pin low
+    void WriteValueToPin(const std::string& label, const bool value); 
 
   private:
     void OpenFileDescriptors();

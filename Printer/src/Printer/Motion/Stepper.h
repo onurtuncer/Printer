@@ -10,7 +10,7 @@ namespace Printer{
     enum LeadScrewHandedness{
         Left,
         Right
-    }
+    };
 
     public:
       explicit Stepper(std::shared_ptr<PinController> pinController,
@@ -18,20 +18,12 @@ namespace Printer{
                        const std::string& dirPin,
                        const std::string& limitSwitchPin,
                        int stepsPerRevolution,
-                       double leadScrewPitch)
-                       : m_PinController(pinController),
-                         m_StepPin(stepPin),
-                         m_DirPin(dirPin),
-                         m_LimitSwitchPin(limitSwitchPin),
-                         m_CurrentPosition(0),
-                         m_IsHoming_(false),
-                         m_StepsPerRevolution(stepsPerRevolution),
-                         m_LeadScrewPitch(leadScrewPitch);
-
+                       double leadScrewPitch);
+                       
       virtual ~Stepper() = default;
 
-      void Initialize() 
-      void Home() 
+      void Initialize();
+      void Home();
       void MoveWithFixedVelocity(bool clockwise, unsigned int velocity); 
       void MoveToLimitSwitch(bool clockwise);
       void MoveAwayFromLimitSwitch(bool clockwise);
@@ -43,11 +35,9 @@ namespace Printer{
       void MoveToPosition(double targetPosition, unsigned int velocity);
 
     private:
+      void MoveSteps(int steps, bool sense, unsigned int velocity);
       bool IsLimitSwitchPressed();
-      bool IsWithinLimits(double targetPosition) const {
-
-        return (targetPosition >= negativeSoftLimit_ && targetPosition <= positiveSoftLimit_);
-    }
+      bool IsWithinLimits(double targetPosition) const;
       
     private:
       std::shared_ptr<PinController> m_PinController;
