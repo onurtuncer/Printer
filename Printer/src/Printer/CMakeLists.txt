@@ -19,6 +19,7 @@ target_sources(printer_lib PUBLIC
                                     Core/Log.cpp 
                                     Core/SignalHandler.cpp  
                                     GPIO/PinController.cpp
+                                    Motion/Stepper.cpp
                                                           ) 
 
 target_include_directories(printer_lib PUBLIC ${SRC_DIR}
