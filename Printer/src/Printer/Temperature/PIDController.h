@@ -1,5 +1,10 @@
 #include <iostream>
 
+namespace Printer::Temperature{
+
+
+}
+
 class LeadLagCompensator {
 private:
     double leadGain;
@@ -49,38 +54,4 @@ public:
     }
 };
 
-int main() {
-    // PID Controller parameters
-    double kp = 1.0;
-    double ki = 0.1;
-    double kd = 0.01;
 
-    // Lead-Lag Compensator parameters
-    double leadGain = 2.0;
-    double lagGain = 0.5;
-    double leadTimeConstant = 0.1;
-    double lagTimeConstant = 1.0;
-
-    // Create PID controller and Lead-Lag Compensator
-    PIDController pidController(kp, ki, kd);
-    LeadLagCompensator compensator(leadGain, lagGain, leadTimeConstant, lagTimeConstant);
-
-    // Simulation loop
-    for (int time = 0; time < 100; ++time) {
-        // Simulated process variable (replace with actual process measurement)
-        double processVariable = 5.0;
-
-        // Setpoint (desired value)
-        double setpoint = 10.0;
-
-        // Calculate PID control output
-        double pidOutput = pidController.calculate(setpoint, processVariable);
-
-        // Cascade with lead-lag compensator
-        double finalControlOutput = compensator.calculate(pidOutput);
-
-        std::cout << "Time: " << time << ", Control Output: " << finalControlOutput << std::endl;
-    }
-
-    return 0;
-}
