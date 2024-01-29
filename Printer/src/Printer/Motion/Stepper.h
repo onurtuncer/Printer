@@ -3,7 +3,7 @@
 #include <memory>
 #include "GPIO/PinController.h"
 
-namespace Printer{
+namespace Printer::Motion{
 
   class Stepper {
 
