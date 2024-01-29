@@ -1,9 +1,9 @@
 #include "PinController.h"
 #include "Core/Log.h"
 
-namespace Printer{
+namespace Printer::GPIO{
 
-  void PinController::InitializeBoardPinConfigMapFromArduinoConnectorConfiguration(){
+  void Controller::InitializeBoardPinConfigMapFromArduinoConnectorConfiguration(){
 
     for (const auto &entry : m_ArdiunoConnectorPinConfiguration){
         
