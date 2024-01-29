@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Interpreter.h"
+
 namespace Printer::Motion{
 
   class Controller{
