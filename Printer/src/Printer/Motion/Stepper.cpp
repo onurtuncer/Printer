@@ -2,7 +2,7 @@
 #include <cmath>
 #include "Stepper.h"
 
-namespace Printer{
+namespace Printer::Motion{
 
   Stepper::Stepper(std::shared_ptr<PinController> pinController,
                    const std::string& stepPin,
