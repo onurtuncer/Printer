@@ -31,6 +31,7 @@ namespace Printer {
     m_RootContext = m_QmlAppEngine->rootContext();
 
     m_RootContext->setContextProperty("printerCoordinatesUpdater", &m_CoordinateProvider);
+    m_RootContext->setContextProperty("temperatureProvider", &temperatureProvider);
 
     QObject::connect(
         m_QmlAppEngine, &QQmlApplicationEngine::objectCreated,
