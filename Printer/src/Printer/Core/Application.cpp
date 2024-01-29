@@ -30,6 +30,8 @@ namespace Printer {
     m_QmlAppEngine = new QQmlApplicationEngine();
     m_RootContext = m_QmlAppEngine->rootContext();
 
+    m_RootContext->setContextProperty("printerCoordinatesUpdater", &m_CoordinateProvider);
+
     QObject::connect(
         m_QmlAppEngine, &QQmlApplicationEngine::objectCreated,
         this, [url](QObject *obj, const QUrl &objUrl)
