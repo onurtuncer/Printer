@@ -13,7 +13,7 @@
 
 namespace Printer::GPIO{
 
-  class PinController{
+  class Controller{
 
     enum PinDirection{
       Input,
@@ -28,8 +28,8 @@ namespace Printer::GPIO{
     };
 
   public:
-    explicit PinController();
-    virtual ~PinController();
+    explicit Controller();
+    virtual ~Controller();
     void TogglePin(const std::string& label);
     void SendPulse(const std::string& label);
     bool ReadPin(const std::string& label);
