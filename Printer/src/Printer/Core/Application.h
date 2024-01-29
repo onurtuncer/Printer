@@ -7,6 +7,7 @@
 #include "SignalHandler.h"
 #include "GPIO/PinController.h"
 #include "UI/CoordinateProvider.h"
+#include "UI/TemperatureProvider.h"
 
 namespace Printer {
 
@@ -33,9 +34,11 @@ namespace Printer {
   private:
     QQmlApplicationEngine* m_QmlAppEngine;
     QQmlContext* m_RootContext;
+
   private:
     std::shared_ptr<PinController> m_PinControllerPtr;
     UI::CoordinateProvider         m_CoordinateProvider;
+    UI::TemperatureProvider        m_TemperatureProvider;
   };
  
 } 
