@@ -6,6 +6,7 @@
 #include "ApplicationSpecification.h"
 #include "SignalHandler.h"
 #include "GPIO/PinController.h"
+#include "UI/CoordinateProvider.h"
 
 namespace Printer {
 
@@ -34,6 +35,7 @@ namespace Printer {
     QQmlContext* m_RootContext;
   private:
     std::shared_ptr<PinController> m_PinControllerPtr;
+    UI::CoordinateProvider         m_CoordinateProvider;
   };
  
 } 
