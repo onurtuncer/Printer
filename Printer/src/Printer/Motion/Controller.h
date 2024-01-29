@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Interpreter.h"
+#include "Stepper.h"
 
 namespace Printer::Motion{
 
@@ -14,10 +15,11 @@ namespace Printer::Motion{
       PausePrinting();
 
     private:
+      typedef std::string::const_iterator Iterator;
+      RS274NGCGrammar<Iterator> m_Parser;
 
       bool m_IsPaused{false};
       
-   
 
 
   }
