@@ -11,7 +11,7 @@
 #include <set>
 #include "STM32MP157F-DK2.h"
 
-namespace Printer{
+namespace Printer::GPIO{
 
   class PinController{
 
