@@ -18,8 +18,9 @@ target_sources(printer_lib PUBLIC
                                     Core/Application.cpp
                                     Core/Log.cpp 
                                     Core/SignalHandler.cpp  
-                                    GPIO/PinController.cpp
+                                    GPIO/Controller.cpp
                                     Motion/Stepper.cpp
+                                    Motoion/Controller.cpp
                                                           ) 
 
 target_include_directories(printer_lib PUBLIC ${SRC_DIR}
